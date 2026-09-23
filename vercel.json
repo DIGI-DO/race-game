@@ -2,7 +2,7 @@
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
   "installCommand": "npm install",
-  "framework": "react",
+  "framework": "vite",
   "env": {
     "VITE_FIREBASE_API_KEY": "@firebase_api_key",
     "VITE_FIREBASE_AUTH_DOMAIN": "@firebase_auth_domain",
