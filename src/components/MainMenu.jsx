@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const DISTANCES = [300, 500, 700, 1000, 1500];
 
@@ -14,10 +14,10 @@ export default function MainMenu({ onPlayLocal, onPlayMultiplayer }) {
         <div className="distance-selector">
           <h3>Distance</h3>
           <div className="distance-buttons">
-            {DISTANCES.map(dist => (
+            {DISTANCES.map((dist) => (
               <button
                 key={dist}
-                className={`distance-btn ${selected === dist ? 'active' : ''}`}
+                className={`distance-btn ${selected === dist ? "active" : ""}`}
                 onClick={() => setSelected(dist)}
               >
                 {dist} km
@@ -27,10 +27,16 @@ export default function MainMenu({ onPlayLocal, onPlayMultiplayer }) {
         </div>
 
         <div className="action-buttons">
-          <button className="btn btn-primary" onClick={() => onPlayLocal(selected)}>
+          <button
+            className="btn btn-primary"
+            onClick={() => onPlayLocal(selected)}
+          >
             ▶️ Jouer contre l'IA
           </button>
-          <button className="btn btn-secondary" onClick={() => onPlayMultiplayer(selected)}>
+          <button
+            className="btn btn-secondary"
+            onClick={() => onPlayMultiplayer(selected)}
+          >
             👥 Multijoueur
           </button>
         </div>
@@ -38,8 +44,8 @@ export default function MainMenu({ onPlayLocal, onPlayMultiplayer }) {
         <div className="info-box">
           <h4>À propos</h4>
           <p>
-            Soyez le premier à atteindre la distance selectionnée.
-            Utilisez des cartes pour avancer et des pièges pour ralentir vos adversaires.
+            Soyez le premier à atteindre la distance selectionnée. Utilisez des
+            cartes pour avancer et des pièges pour ralentir vos adversaires.
           </p>
         </div>
       </div>
