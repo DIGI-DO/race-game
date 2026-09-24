@@ -1,20 +1,23 @@
 import React, { useState } from "react";
 
 export default function PlayerSetup({ distance, onStart, onBack }) {
-  const [player1Name, setPlayer1Name] = useState("Joueur 1");
-  const [player2Name, setPlayer2Name] = useState("Joueur 2");
   const [gameMode, setGameMode] = useState("local"); // 'local' ou 'multiplayer'
+  const [player1Name, setPlayer1Name] = useState("");
+  const [player2Name, setPlayer2Name] = useState("");
 
   const handleStart = () => {
-    if (!player1Name.trim() || !player2Name.trim()) {
-      alert("Veuillez entrer les noms des deux joueurs");
+    if (!player1Name.trim()) {
+      alert("Veuillez entrer votre nom");
       return;
     }
-    onStart({
-      player1: player1Name.trim(),
-      player2: player2Name.trim(),
-      mode: gameMode,
-    });
+
+    if (gameMode === "multiplayer" && !player2Name.trim()) {
+      alert("Veuillez entrer le nom de l'adversaire");
+      return;
+    }
+
+    const player2 = gameMode === "local" ? "IA" : player2Name.trim();
+    onStart({ player1: player1Name.trim(), player2, mode: gameMode });
   };
 
   return (
@@ -30,33 +33,9 @@ export default function PlayerSetup({ distance, onStart, onBack }) {
         </p>
 
         <div className="setup-form">
+          {/* Mode selector */}
           <div className="form-group">
-            <label>👤 Joueur 1</label>
-            <input
-              type="text"
-              value={player1Name}
-              onChange={(e) => setPlayer1Name(e.target.value)}
-              placeholder="Votre nom"
-              maxLength="15"
-              className="input-name"
-              autoFocus
-            />
-          </div>
-
-          <div className="form-group">
-            <label>🎮 Joueur 2</label>
-            <input
-              type="text"
-              value={player2Name}
-              onChange={(e) => setPlayer2Name(e.target.value)}
-              placeholder="Adversaire"
-              maxLength="15"
-              className="input-name"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Mode</label>
+            <label>Mode de jeu</label>
             <div className="mode-selector">
               <button
                 className={`mode-btn ${gameMode === "local" ? "active" : ""}`}
@@ -72,6 +51,42 @@ export default function PlayerSetup({ distance, onStart, onBack }) {
               </button>
             </div>
           </div>
+
+          {/* Player name */}
+          <div className="form-group">
+            <label>👤 Votre nom</label>
+            <input
+              type="text"
+              value={player1Name}
+              onChange={(e) => setPlayer1Name(e.target.value)}
+              placeholder="Entrez votre nom"
+              maxLength="15"
+              className="input-name"
+              autoFocus
+            />
+          </div>
+
+          {/* Opponent name (only for multiplayer) */}
+          {gameMode === "multiplayer" && (
+            <div className="form-group">
+              <label>👥 Nom de l'adversaire</label>
+              <input
+                type="text"
+                value={player2Name}
+                onChange={(e) => setPlayer2Name(e.target.value)}
+                placeholder="Entrez son nom"
+                maxLength="15"
+                className="input-name"
+              />
+            </div>
+          )}
+
+          {/* AI info */}
+          {gameMode === "local" && (
+            <div className="info-box">
+              <p>Vous affronterez une IA aléatoire</p>
+            </div>
+          )}
         </div>
 
         <div className="action-buttons">

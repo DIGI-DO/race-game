@@ -63,6 +63,15 @@ export default function GameLocal({ game, distance, playerNames, onBack }) {
   const playCard = (card) => {
     if (!isHumanTurn || animating) return;
 
+    // Vérifier si le joueur est bloqué
+    if (humanPlayer.skipped_turns > 0) {
+      showNotification(
+        `⏸️ Vous êtes bloqué pour ${humanPlayer.skipped_turns} tour(s) encore`,
+        "warning",
+      );
+      return;
+    }
+
     try {
       setAnimating(true);
       const result = game.playCard(0, card);
@@ -96,6 +105,26 @@ export default function GameLocal({ game, distance, playerNames, onBack }) {
     }
   };
 
+  const skipHumanTurn = () => {
+    const humanPlayer = game.players[0];
+
+    if (humanPlayer.skipped_turns > 0) {
+      showNotification(
+        `⏸️ ${playerNames.player1} passe son tour (bloqué ${humanPlayer.skipped_turns}t)`,
+        "warning",
+      );
+      humanPlayer.skipped_turns -= 1;
+      setState(game.getState());
+      game.turn += 1;
+
+      setBlockingAnimation(true);
+      setTimeout(() => {
+        setBlockingAnimation(false);
+        setTimeout(() => playAITurn(), 800);
+      }, 1200);
+    }
+  };
+
   const playAITurn = () => {
     const freshState = game.getState();
     const alive = freshState.active_players;
@@ -108,6 +137,22 @@ export default function GameLocal({ game, distance, playerNames, onBack }) {
       return;
     }
 
+    // Vérifier si c'est le tour du joueur humain
+    const nextPlayerIndex = alive[game.turn % alive.length];
+    if (nextPlayerIndex === 0) {
+      // C'est le tour du joueur humain
+      const humanPlayer = game.players[0];
+      if (humanPlayer.skipped_turns > 0) {
+        // Le joueur est bloqué, passer automatiquement
+        skipHumanTurn();
+        return;
+      }
+      // Sinon, laisser le joueur jouer
+      setAnimating(false);
+      return;
+    }
+
+    // C'est le tour de l'IA
     const aiIndex = 1;
     const aiPlayer = game.players[aiIndex];
 
