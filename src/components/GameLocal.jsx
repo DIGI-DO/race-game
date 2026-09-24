@@ -129,6 +129,7 @@ export default function GameLocal({ game, distance, playerNames, onBack }) {
     const freshState = game.getState();
     const alive = freshState.active_players;
 
+    // Vérifier si la partie est finie
     if (alive.length <= 1) {
       if (alive.length === 1) {
         setWinner(alive[0]);
@@ -137,26 +138,49 @@ export default function GameLocal({ game, distance, playerNames, onBack }) {
       return;
     }
 
-    // Vérifier si c'est le tour du joueur humain
+    // Déterminer à qui c'est le tour
     const nextPlayerIndex = alive[game.turn % alive.length];
+
+    // Tour du joueur humain
     if (nextPlayerIndex === 0) {
-      // C'est le tour du joueur humain
       const humanPlayer = game.players[0];
+
+      // S'il est bloqué, passer automatiquement
       if (humanPlayer.skipped_turns > 0) {
-        // Le joueur est bloqué, passer automatiquement
-        skipHumanTurn();
+        showNotification(
+          `⏸️ ${playerNames.player1} passe son tour (bloqué ${humanPlayer.skipped_turns}t)`,
+          "warning",
+        );
+        humanPlayer.skipped_turns -= 1;
+        setState(game.getState());
+        game.turn += 1;
+
+        setBlockingAnimation(true);
+        setTimeout(() => {
+          setBlockingAnimation(false);
+          setTimeout(() => playAITurn(), 800);
+        }, 1200);
         return;
       }
+
       // Sinon, laisser le joueur jouer
       setAnimating(false);
       return;
     }
 
-    // C'est le tour de l'IA
-    const aiIndex = 1;
-    const aiPlayer = game.players[aiIndex];
+    // Tour de l'IA
+    const aiPlayer = game.players[1];
 
-    // Tour bloqué - afficher l'animation
+    // L'IA est éliminée
+    if (aiPlayer.eliminated) {
+      showNotification(`❌ ${playerNames.player2} a été éliminé!`, "error");
+      game.turn += 1;
+      setState(game.getState());
+      setTimeout(() => playAITurn(), 1200);
+      return;
+    }
+
+    // L'IA est bloquée
     if (aiPlayer.skipped_turns > 0) {
       setBlockingAnimation(true);
       showNotification(
@@ -173,35 +197,24 @@ export default function GameLocal({ game, distance, playerNames, onBack }) {
       return;
     }
 
-    // IA éliminée
-    if (aiPlayer.eliminated) {
-      showNotification(`❌ ${playerNames.player2} a été éliminé!`, "error");
-      game.turn += 1;
-      setState(game.getState());
-      setTimeout(() => playAITurn(), 1200);
-      return;
-    }
-
-    // Choisir une carte
+    // L'IA joue
     const playables = game.playable_cards(aiPlayer);
+
     if (playables.length === 0) {
       if (aiPlayer.speed_limit !== null) {
         aiPlayer.speed_limit = null;
       }
-      showNotification(
-        `⏸️ ${playerNames.player2} n'a pas de carte jouable`,
-        "warning",
-      );
       game.turn += 1;
       setState(game.getState());
       setTimeout(() => playAITurn(), 800);
       return;
     }
 
-    // Jouer une carte aléatoire
+    // Choisir une carte aléatoire
     const card = playables[Math.floor(Math.random() * playables.length)];
+
     try {
-      const result = game.playCard(aiIndex, card);
+      const result = game.playCard(1, card);
 
       // Afficher ce que l'IA a joué
       if (card in { 30: 1, 50: 1, 90: 1, 110: 1, 130: 1 }) {
